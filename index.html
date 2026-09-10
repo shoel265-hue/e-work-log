@@ -623,12 +623,12 @@
         });
     }
 
-    // ★ 서버 데이터 불러오기 기능 (기존 입력값 유실 방어 로직 적용) ★
+    // ★ 서버 데이터 불러오기 기능 (안전한 초기화 및 데이터 매핑 로직) ★
     function loadSavedDataFromServer() {
         const workDate = document.getElementById("work-date").value;
         if (!workDate) return;
 
-        // 1. 우선 화면의 모든 필드를 깨끗하게 비우거나 기본 상태로 초기화
+        // 1. 화면의 모든 필드를 초기화 (기본값 설정)
         const workerRows = document.querySelectorAll(".worker-row");
         workerRows.forEach((row, idx) => {
             row.querySelector(".w-name").value = (idx === 0) ? "이욱호" : "";
@@ -661,7 +661,6 @@
         fetch(`${GAS_WEB_APP_URL}?workDate=${workDate}`)
         .then(res => res.json())
         .then(res => {
-            // 서버에 데이터가 정상적으로 존재하는 경우에만 값들을 덮어씀
             if (res.status === "success" && res.data && res.data["jeongi"]) {
                 const teamData = res.data["jeongi"];
                 const data = teamData.contentData;
@@ -710,10 +709,9 @@
                     });
                 }
 
-                // 서버에 저장된 근무자 데이터가 있으면 정확하게 매핑
+                // 근무자 데이터 안전 매핑 (저장된 값 우선 적용)
                 if (data.workers && Array.isArray(data.workers) && data.workers.length > 0) {
-                    const rows = document.querySelectorAll(".worker-row");
-                    rows.forEach((row, idx) => {
+                    workerRows.forEach((row, idx) => {
                         if (data.workers[idx]) {
                             row.querySelector(".w-name").value = data.workers[idx].name || "";
                             row.querySelector(".w-jugan").value = data.workers[idx].jugan || "";
